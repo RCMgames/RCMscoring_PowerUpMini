@@ -7,7 +7,7 @@ static final int Left=-1;
 static final int Right=1;
 
 int blueSide=Right;
-int LswitchBlue=Near;
+int LswitchBlue=Far;
 int scaleBlue=Far;
 int RswitchBlue=Far;
 
@@ -18,10 +18,16 @@ int RswitchPos=0;
 float redScore=0;
 float blueScore=0;
 
+int redRP=0;
+int blueRP=0;
+
 float redSwitchOwnershipTime=0;
 float redScaleOwnershipTime=0;
 float blueScaleOwnershipTime=0;
 float blueSwitchOwnershipTime=0;
+
+float redOwnershipPercent=0;
+float blueOwnershipPercent=0;
 
 float redOwnershipScore=0;
 float blueOwnershipScore=0;
@@ -32,10 +38,10 @@ float bluePenaltyScore=0;
 int redClimbs=0;
 int blueClimbs=0;
 
-int state=0;
+int state=-1;
 
 float matchTime=0;
-int totalMatchTime=5*60;
+int totalMatchTime=40;//5*60;
 int matchStartMillis=0;
 int endgameTime=30;
 int autoTime=15;
@@ -45,14 +51,27 @@ float switchPointsPerSecondEnd=2;
 float scalePointsPerSecondStart=1;
 float scalePointsPerSecondEnd=2;
 
+float switchForOwnership=1;
+float scaleForOwnership=0;
+
 float climbPoints=90;
 float foulValue=15;
 float techFoulValue=100;
+float ownershipRPPercent=90;
 
-
+boolean nextState=false;
 long millisLastCalculatedScore=0;
 long redFoulMillis=0;
 long blueFoulMillis=0;
+long redTechFoulMillis=0;
+long blueTechFoulMillis=0;
+
+Integer leftSwitchOverride=null;
+Integer scaleOverride=null;
+Integer rightSwitchOverride=null;
+
+int maxClimbs=2;
+
 
 void settings() {
   size(1920, 300);
@@ -63,7 +82,17 @@ void setup() {
 }
 
 void draw() {
-  background(#E5B102);
+  //TODO: READ ARDUINO
+  if (leftSwitchOverride!=null) {
+    LswitchPos=leftSwitchOverride;
+  }
+  if (scaleOverride!=null) {
+    scalePos=scaleOverride;
+  }
+  if (rightSwitchOverride!=null) {
+    RswitchPos=rightSwitchOverride;
+  }
+
   if (state<0) {
     redScore=0;
     blueScore=0;
@@ -77,9 +106,62 @@ void draw() {
     bluePenaltyScore=0;
     redClimbs=0;
     blueClimbs=0;
+    redOwnershipPercent=0;
+    blueOwnershipPercent=0;
+    redRP=0;
+    blueRP=0;
+    matchStartMillis=millis();
   }
+  if (state==-1) {
+    background(#999999);
+    textSize(20);
+    fill(0);
+    text("pre match", width/2, height/2);
+  }
+
+  if (state==2) {
+    noStroke();
+    rectMode(CENTER);
+    textAlign(CENTER, CENTER);
+    textSize(height/3);
+    if (int(redScore)>int(blueScore)) {
+      fill(255, 0, 0);
+      rect(width/2, height/2, width/3, height);
+      fill(0);
+      text("RED Wins", width/2, height/2);
+    }
+    if (int(redScore)<int(blueScore)) {
+      fill(0, 0, 255);
+      rect(width/2, height/2, width/3, height);
+      fill(0);
+      text("BLUE Wins", width/2, height/2);
+    }
+    if (int(redScore)==int(blueScore)) {
+      fill(255, 255, 0);
+      rect(width/2, height/2, width/3, height);
+      fill(0);
+      text("TIE", width/2, height/2);
+    }
+    fill(0, 0, 255);
+    String[] blueL={"points", "ownership points", "RPs", "climbs", "switch ownership %", "switch own time", "scale own time", "penalties"};
+    String[] blueD={str(int(blueScore)), str(int(redOwnershipScore)), str(blueRP), str(blueClimbs), str(int(blueOwnershipPercent))+((blueOwnershipPercent>ownershipRPPercent)?"  (RP)":""), str(int(blueSwitchOwnershipTime)), str(int(blueScaleOwnershipTime)), str(bluePenaltyScore)};
+    if (blueSide==Left) {
+      dispData(color(0, 0, 100), blueL, blueD, 0, 0, width/3, height, 25);
+    } else {
+      dispData(color(0, 0, 100), blueL, blueD, width*2/3, 0, width/3, height, 35);
+    }
+    String[] redL={"points", "ownership points", "RPs", "climbs", "switch ownership %", "switch own time", "scale own time", "penalties"};
+    String[] redD={str(int(redScore)), str(int(redOwnershipScore)), str(redRP), str(redClimbs), str(int(redOwnershipPercent))+((redOwnershipPercent>ownershipRPPercent)?"  (RP)":""), str(int(redSwitchOwnershipTime)), str(int(redScaleOwnershipTime)), str(redPenaltyScore)};
+    if (blueSide==Left) {
+      dispData(color(100, 0, 0), redL, redD, width*2/3, 0, width/3, height, 25);
+    } else {
+      dispData(color(100, 0, 0), redL, redD, 0, 0, width/3, height, 35);
+    }
+  }
+
   if (state==0) {
-    matchTime=totalMatchTime-(millis()+matchStartMillis)/1000.0;
+    background(#E5B102);
+    matchTime=totalMatchTime-(millis()-matchStartMillis)/1000.0;
 
     float switchPointsPerSecond=map(matchTime, totalMatchTime, 0, switchPointsPerSecondStart, switchPointsPerSecondEnd);
     float scalePointsPerSecond=map(matchTime, totalMatchTime, 0, scalePointsPerSecondStart, scalePointsPerSecondEnd);
@@ -105,8 +187,11 @@ void draw() {
       blueScaleOwnershipTime+=interval;
     }
 
-    redScore=redOwnershipScore-redPenaltyScore;
-    blueScore=blueOwnershipScore-bluePenaltyScore;
+    blueOwnershipPercent=(blueScaleOwnershipTime*scaleForOwnership+blueSwitchOwnershipTime*switchForOwnership)*100.0/totalMatchTime;
+    redOwnershipPercent=(redScaleOwnershipTime*scaleForOwnership+redSwitchOwnershipTime*switchForOwnership)*100.0/totalMatchTime;
+
+    redScore=redOwnershipScore+redPenaltyScore;
+    blueScore=blueOwnershipScore+bluePenaltyScore;
 
     if (matchTime<=0)
       state=1;
@@ -120,9 +205,73 @@ void draw() {
     }
     drawScores(height*.3, height*.69, .2);
     drawTime(width*.4, height*.25, height*.05);
+    drawPenaltyFlags();
   } else {
     millisLastCalculatedScore=millis();
   }
+  if (state==1) {
+    background(#FFFF00);
+    textSize(50);
+    fill(0);
+    text("final scores are being reviewed", width/4, height/2);
+    redScore=redOwnershipScore+redPenaltyScore+climbPoints*redClimbs;
+    blueScore=blueOwnershipScore+bluePenaltyScore+climbPoints*blueClimbs;
+    redRP=2*int(int(redScore)>int(blueScore)+int(int(redScore)==int(blueScore)))+int(redOwnershipPercent>=ownershipRPPercent)+int(redClimbs==maxClimbs);
+    blueRP=2*int(int(blueScore)>int(redScore)+int(int(blueScore)==int(redScore)))+int(blueOwnershipPercent>=ownershipRPPercent)+int(blueClimbs==maxClimbs);
+  }
+}
+
+void drawPenaltyFlags() {
+  pushStyle();
+  if (millis()-redFoulMillis<1000) {
+    penaltyFlag(blueSide==Left, 1-1*cos((millis()-redFoulMillis)*1*TWO_PI/1000), color(255, 0, 0));
+  }
+  if (millis()-redTechFoulMillis<1000) {
+    penaltyFlag(blueSide==Left, 1-1*cos((millis()-redTechFoulMillis)*1*TWO_PI/1000), color(255, 0, 0));
+  } else if (millis()-redTechFoulMillis<2000) {
+    techX(-blueSide, color(255, 0, 0));
+  }
+  if (millis()-blueFoulMillis<1000) {
+    penaltyFlag(blueSide==Right, 1-1*cos((millis()-blueFoulMillis)*1*TWO_PI/1000), color(0, 0, 255));
+  }
+  if (millis()-blueTechFoulMillis<1000) {
+    penaltyFlag(blueSide==Right, 1-1*cos((millis()-blueTechFoulMillis)*1*TWO_PI/1000), color(0, 0, 255));
+  } else if (millis()-blueTechFoulMillis<2000) {
+    techX(blueSide, color(0, 0, 255));
+  }
+  popStyle();
+}
+
+void techX(int s, color c) { 
+  pushStyle();
+  fill(c);
+  textSize(height*.5);
+  textAlign(CENTER);
+  rectMode(CENTER);
+  text("X", width*.5+s*.45*width, height*.5, width*.2, height*.6);
+  popStyle();
+}
+
+void penaltyFlag(boolean right, float angle, color c) {
+  pushMatrix();
+  noStroke();
+  fill(c);
+  rectMode(CORNER);
+  if (right) {
+    translate(width, height*.7);
+    rotate(-angle);
+  } else {
+    translate(0, height*.7);
+    rotate(angle);
+  }
+  if (right) {
+    rect(0, -width*.1, -width*.05, width*.05);
+  } else {
+    rect(0, -width*.1, width*.05, width*.05);
+  }
+  fill(0);
+  rect(-4, 0, 8, -width*.1);
+  popMatrix();
 }
 
 void drawTime(float w, float h, float y) {
@@ -224,34 +373,19 @@ boolean blueScale() {
 boolean redScale() {
   return (-scalePos*scaleBlue)==1;
 }
-
-
-void keyPressed() {
-  if (key=='q') {
-    LswitchPos=Far;
+void dispData(color c, String[] msg, String[] val, float x, float y, float w, float h, float ts) {
+  pushStyle();
+  rectMode(CORNER);
+  textSize(ts);
+  stroke(255);
+  strokeWeight(1);
+  fill(c);
+  rect(x, y, w, h-1);
+  fill(255);
+  textAlign(LEFT);
+  for (int i=0; i<msg.length; i++) {
+    text(msg[i], x+5, (i)*h/(msg.length+1)+y, w*.95, 2*h/(msg.length+1));
+    text(": "+val[i], x+5+constrain(textWidth(msg[i]+": "), 0, w*.95), (i)*h/(msg.length+1)+y, w- textWidth(": "+msg[i]), 2*h/(msg.length+1));
   }
-  if (key=='a') {
-    LswitchPos=Center;
-  }
-  if (key=='z') {
-    LswitchPos=Near;
-  }
-  if (key=='w') {
-    scalePos=Far;
-  }
-  if (key=='s') {
-    scalePos=Center;
-  }
-  if (key=='x') {
-    scalePos=Near;
-  }
-  if (key=='e') {
-    RswitchPos=Far;
-  }
-  if (key=='d') {
-    RswitchPos=Center;
-  }
-  if (key=='c') {
-    RswitchPos=Near;
-  }
+  popStyle();
 }
