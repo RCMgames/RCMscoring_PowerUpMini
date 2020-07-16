@@ -161,6 +161,7 @@ class refPWindow extends PApplet {
         fill(160);
       }
       rect(width*(.4+.05), height*(.8+.1), width*.04, height*.09);
+      rectMode(CORNER);
     }
   }
 

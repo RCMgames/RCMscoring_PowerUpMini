@@ -88,7 +88,12 @@ void settings() {
 void setup() {
   refWin=new refPWindow();
   frameRate(100);
-  myPort=new Serial(this, serialPort, 250000);
+  try {
+    myPort=new Serial(this, serialPort, 250000);
+  }
+  catch(RuntimeException e) {
+    println("WARNING: FIELD ARDUINO DISCONNECTED");
+  }
 }
 
 void serialEvent(Serial p) {
