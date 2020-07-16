@@ -1,3 +1,4 @@
+boolean plateOverride=false;
 class refPWindow extends PApplet {
   refPWindow() {
     super();
@@ -9,7 +10,7 @@ class refPWindow extends PApplet {
   }
 
   void setup() {    
-    frameRate(60);
+    frameRate(100);
     background(255);
   }
 
@@ -19,6 +20,16 @@ class refPWindow extends PApplet {
       fill(0);
       textSize(35);
       text("match time elapsed: "+str(int(totalMatchTime-matchTime)) +"  ("+str(int((totalMatchTime-matchTime)*100/totalMatchTime))+" %)", width*.26, 40);
+    }
+    textSize(35);
+    if (millis()-lastMillisArduinoComms<50) {
+      fill(0);
+      text("field connected", width*.56, 40);
+    } else {
+      fill(255, 0, 0);
+      rect(width*.55, 0, width*.2, 50);
+      fill(0);
+      text("CONNECTION LOST", width*.56, 40);
     }
 
     String[] bmsg={"score", "ownership score", "penalty score", "ownership %", "switch own time", "scale own time", "climbs"};
@@ -36,6 +47,18 @@ class refPWindow extends PApplet {
     if (nextState) {
       nextState=false;
       state++;
+      if (state==2) {//post match
+        String strToSave=str(year())+"/"+str(month())+"/"+str(day())+" "+str(hour())+":"+str(minute())+":"+str(second())+","+str(int(blueScore))+","+str(int(redScore))+","+str(blueRP)+","+str(int(redRP))+","+str(bluePenaltyScore)+","+str(redPenaltyScore)+","+str(blueClimbs)+","+str(redClimbs)+","+nf(blueOwnershipPercent, 3, 1)+","+nf(redOwnershipPercent, 3, 1)+","+int(blueSwitchOwnershipTime)+","+int(redSwitchOwnershipTime)+","+int(blueScaleOwnershipTime)+","+int(redScaleOwnershipTime) +","+str(int(totalMatchTime-matchTime));
+        try {        
+          String[] stringsToSave=loadStrings(filename);
+          stringsToSave=append(stringsToSave, strToSave);                  
+          saveStrings(filename, stringsToSave);
+        }
+        catch(NullPointerException e) {
+          String[] stringsToSave={strToSave};
+          saveStrings(filename, stringsToSave);
+        }
+      }
       if (state>2) {
         state=-1;
       }
@@ -80,134 +103,136 @@ class refPWindow extends PApplet {
       text("(g) Climb", width*.4, height*.3, width*.09, height*.15);
       rectMode(CORNER);
     }
+    if (plateOverride) {
+      rectMode(CENTER);
+      if (leftSwitchOverride!=null&&leftSwitchOverride==Far) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4-.05), height*(.8-.1), width*.04, height*.09);
+      if (leftSwitchOverride!=null&&leftSwitchOverride==Center) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4-.05), height*(.8), width*.04, height*.09);
+      if (leftSwitchOverride!=null&&leftSwitchOverride==Near) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4-.05), height*(.8+.1), width*.04, height*.09);
 
-    rectMode(CENTER);
-    if (leftSwitchOverride!=null&&leftSwitchOverride==Far) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4-.05), height*(.8-.1), width*.04, height*.09);
-    if (leftSwitchOverride!=null&&leftSwitchOverride==Center) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4-.05), height*(.8), width*.04, height*.09);
-    if (leftSwitchOverride!=null&&leftSwitchOverride==Near) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4-.05), height*(.8+.1), width*.04, height*.09);
+      if (scaleOverride!=null&&scaleOverride==Far) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4), height*(.8-.1), width*.04, height*.09);
+      if (scaleOverride!=null&&scaleOverride==Center) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4), height*(.8), width*.04, height*.09);
+      if (scaleOverride!=null&&scaleOverride==Near) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4), height*(.8+.1), width*.04, height*.09);
 
-    if (scaleOverride!=null&&scaleOverride==Far) {
-      fill(0);
-    } else {
-      fill(160);
+      if (rightSwitchOverride!=null&&rightSwitchOverride==Far) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4+.05), height*(.8-.1), width*.04, height*.09);
+      if (rightSwitchOverride!=null&&rightSwitchOverride==Center) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4+.05), height*(.8), width*.04, height*.09);
+      if (rightSwitchOverride!=null&&rightSwitchOverride==Near) {
+        fill(0);
+      } else {
+        fill(160);
+      }
+      rect(width*(.4+.05), height*(.8+.1), width*.04, height*.09);
     }
-    rect(width*(.4), height*(.8-.1), width*.04, height*.09);
-    if (scaleOverride!=null&&scaleOverride==Center) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4), height*(.8), width*.04, height*.09);
-    if (scaleOverride!=null&&scaleOverride==Near) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4), height*(.8+.1), width*.04, height*.09);
-
-    if (rightSwitchOverride!=null&&rightSwitchOverride==Far) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4+.05), height*(.8-.1), width*.04, height*.09);
-    if (rightSwitchOverride!=null&&rightSwitchOverride==Center) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4+.05), height*(.8), width*.04, height*.09);
-    if (rightSwitchOverride!=null&&rightSwitchOverride==Near) {
-      fill(0);
-    } else {
-      fill(160);
-    }
-    rect(width*(.4+.05), height*(.8+.1), width*.04, height*.09);
   }
 
   void mouseReleased() {
     if (mouseInCR(width*.6, height*.8, width*.1, height*.2)) {
       nextState=true;
     }
+    if (plateOverride) {
+      if (mouseInCR(width*(.4-.05), height*(.8-.1), width*.04, height*.09)) {
+        if (leftSwitchOverride==null) {
+          leftSwitchOverride=Far;
+        } else {
+          leftSwitchOverride=null;
+        }
+      }
+      if (mouseInCR(width*(.4-.05), height*(.8), width*.04, height*.09)) {      
+        if (leftSwitchOverride==null) {
+          leftSwitchOverride=Center;
+        } else {
+          leftSwitchOverride=null;
+        }
+      }
+      if (mouseInCR(width*(.4-.05), height*(.8+.1), width*.04, height*.09)) {      
+        if (leftSwitchOverride==null) {
+          leftSwitchOverride=Near;
+        } else {
+          leftSwitchOverride=null;
+        }
+      }
 
-    if (mouseInCR(width*(.4-.05), height*(.8-.1), width*.04, height*.09)) {
-      if (leftSwitchOverride==null) {
-        leftSwitchOverride=Far;
-      } else {
-        leftSwitchOverride=null;
+      if (mouseInCR(width*(.4), height*(.8-.1), width*.04, height*.09)) {      
+        if (scaleOverride==null) {
+          scaleOverride=Far;
+        } else {
+          scaleOverride=null;
+        }
       }
-    }
-    if (mouseInCR(width*(.4-.05), height*(.8), width*.04, height*.09)) {      
-      if (leftSwitchOverride==null) {
-        leftSwitchOverride=Center;
-      } else {
-        leftSwitchOverride=null;
+      if (mouseInCR(width*.4, height*.8, width*.04, height*.09)) {
+        if (scaleOverride==null) {
+          scaleOverride=Center;
+        } else {
+          scaleOverride=null;
+        }
       }
-    }
-    if (mouseInCR(width*(.4-.05), height*(.8+.1), width*.04, height*.09)) {      
-      if (leftSwitchOverride==null) {
-        leftSwitchOverride=Near;
-      } else {
-        leftSwitchOverride=null;
+      if (mouseInCR(width*(.4), height*(.8+.1), width*.04, height*.09)) {
+        if (scaleOverride==null) {
+          scaleOverride=Near;
+        } else {
+          scaleOverride=null;
+        }
       }
-    }
 
-    if (mouseInCR(width*(.4), height*(.8-.1), width*.04, height*.09)) {      
-      if (scaleOverride==null) {
-        scaleOverride=Far;
-      } else {
-        scaleOverride=null;
+      if (mouseInCR(width*(.4+.05), height*(.8-.1), width*.04, height*.09)) {
+        if (rightSwitchOverride==null) {
+          rightSwitchOverride=Far;
+        } else {
+          rightSwitchOverride=null;
+        }
       }
-    }
-    if (mouseInCR(width*.4, height*.8, width*.04, height*.09)) {
-      if (scaleOverride==null) {
-        scaleOverride=Center;
-      } else {
-        scaleOverride=null;
+      if (mouseInCR(width*(.4+.05), height*(.8), width*.04, height*.09)) {
+        if (rightSwitchOverride==null) {
+          rightSwitchOverride=Center;
+        } else {
+          rightSwitchOverride=null;
+        }
       }
-    }
-    if (mouseInCR(width*(.4), height*(.8+.1), width*.04, height*.09)) {
-      if (scaleOverride==null) {
-        scaleOverride=Near;
-      } else {
-        scaleOverride=null;
-      }
-    }
-
-    if (mouseInCR(width*(.4+.05), height*(.8-.1), width*.04, height*.09)) {
-      if (rightSwitchOverride==null) {
-        rightSwitchOverride=Far;
-      } else {
-        rightSwitchOverride=null;
-      }
-    }
-    if (mouseInCR(width*(.4+.05), height*(.8), width*.04, height*.09)) {
-      if (rightSwitchOverride==null) {
-        rightSwitchOverride=Center;
-      } else {
-        rightSwitchOverride=null;
-      }
-    }
-    if (mouseInCR(width*(.4+.05), height*(.8+.1), width*.04, height*.09)) {
-      if (rightSwitchOverride==null) {
-        rightSwitchOverride=Near;
-      } else {
-        rightSwitchOverride=null;
+      if (mouseInCR(width*(.4+.05), height*(.8+.1), width*.04, height*.09)) {
+        if (rightSwitchOverride==null) {
+          rightSwitchOverride=Near;
+        } else {
+          rightSwitchOverride=null;
+        }
       }
     }
 
@@ -271,6 +296,9 @@ class refPWindow extends PApplet {
   void keyReleased() {
     if (key=='b') {
       nextState=true;
+    }
+    if (key=='0') {
+      plateOverride=!plateOverride;
     }
     if (state==0||state==1) {
       if (key=='j') {

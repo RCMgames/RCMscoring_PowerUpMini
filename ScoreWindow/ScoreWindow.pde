@@ -1,19 +1,26 @@
 refPWindow refWin;
-
+import processing.serial.*;
+Serial myPort;
 static final int Near=1;
 static final int Far=-1;
 static final int Center=0;
 static final int Left=-1;
 static final int Right=1;
 
-int blueSide=Right;
-int LswitchBlue=Far;
-int scaleBlue=Far;
-int RswitchBlue=Far;
+String filename="C:/Users/Joshua/Google Drive/JoshuaFiles/Current/Projects/rcmgames/RCMgames/competition scoring/mini powerup/test/rcmscores.txt";
+String serialPort="COM5";
+
+int blueSide=Right;////
+int LswitchBlue=Far;////
+int scaleBlue=Far;////
+int RswitchBlue=Far;////
 
 int LswitchPos=0;
 int scalePos=0;
 int RswitchPos=0;
+int LswitchPosA=0;
+int scalePosA=0;
+int RswitchPosA=0;
 
 float redScore=0;
 float blueScore=0;
@@ -41,23 +48,23 @@ int blueClimbs=0;
 int state=-1;
 
 float matchTime=0;
-int totalMatchTime=40;//5*60;
+int totalMatchTime=5*60;/////
 int matchStartMillis=0;
-int endgameTime=30;
-int autoTime=15;
+int endgameTime=30;////
+int autoTime=15;////
 
-float switchPointsPerSecondStart=1;
-float switchPointsPerSecondEnd=2;
-float scalePointsPerSecondStart=1;
-float scalePointsPerSecondEnd=2;
+float switchPointsPerSecondStart=1;////
+float switchPointsPerSecondEnd=2;////
+float scalePointsPerSecondStart=1;////
+float scalePointsPerSecondEnd=2;////
 
-float switchForOwnership=1;
-float scaleForOwnership=0;
+float switchForOwnership=1;////
+float scaleForOwnership=0;////
 
-float climbPoints=90;
-float foulValue=15;
-float techFoulValue=100;
-float ownershipRPPercent=90;
+float climbPoints=90;////
+float foulValue=15;////
+float techFoulValue=100;////
+float ownershipRPPercent=90;////
 
 boolean nextState=false;
 long millisLastCalculatedScore=0;
@@ -65,12 +72,13 @@ long redFoulMillis=0;
 long blueFoulMillis=0;
 long redTechFoulMillis=0;
 long blueTechFoulMillis=0;
+long lastMillisArduinoComms=0;
 
 Integer leftSwitchOverride=null;
 Integer scaleOverride=null;
 Integer rightSwitchOverride=null;
 
-int maxClimbs=2;
+int maxClimbs=2;////
 
 
 void settings() {
@@ -79,10 +87,28 @@ void settings() {
 
 void setup() {
   refWin=new refPWindow();
+  frameRate(100);
+  myPort=new Serial(this, serialPort, 250000);
+}
+
+void serialEvent(Serial p) {
+  lastMillisArduinoComms=millis();
+  int in=p.read();
+  LswitchPosA=0;
+  scalePosA=0;
+  RswitchPosA=0;
+  if (((byte)in & 0x01)==1) LswitchPosA+=Far;
+  if (((byte)in>>1 & 0x01)==1) LswitchPosA+=Near;
+  if (((byte)in>>2 & 0x01)==1) scalePosA+=Far;
+  if (((byte)in>>3 & 0x01)==1) scalePosA+=Near;
+  if (((byte)in>>4 & 0x01)==1) RswitchPosA+=Far;
+  if (((byte)in>>5 & 0x01)==1) RswitchPosA+=Near;
 }
 
 void draw() {
-  //TODO: READ ARDUINO
+  LswitchPos=LswitchPosA;
+  scalePos=scalePosA;
+  RswitchPos=RswitchPosA;
   if (leftSwitchOverride!=null) {
     LswitchPos=leftSwitchOverride;
   }
