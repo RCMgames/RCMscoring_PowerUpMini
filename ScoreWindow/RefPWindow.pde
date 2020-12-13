@@ -31,11 +31,10 @@ class refPWindow extends PApplet {
       fill(0);
       text("CONNECTION LOST", width*.56, 40);
     }
-
-    String[] bmsg={"score", "ownership score", "penalty score", "ownership %", "switch own time", "scale own time", "climbs"};
-    String[] bval={str(int(blueScore)), str(int(blueOwnershipScore)), str(int(bluePenaltyScore)), nf(blueOwnershipPercent, 3, 1)+(blueOwnershipPercent>=ownershipRPPercent?"   (RP)":""), str(int(blueSwitchOwnershipTime)), str(int(blueScaleOwnershipTime)), blueClimbs==maxClimbs?str(blueClimbs)+"         (RP)":str(blueClimbs)};
-    String[] rmsg={"score", "ownership score", "penalty score", "ownership %", "switch own time", "scale own time", "climbs"};
-    String[] rval={str(int(redScore)), str(int(redOwnershipScore)), str(int(redPenaltyScore)), nf(redOwnershipPercent, 3, 1)+(redOwnershipPercent>=ownershipRPPercent?"   (RP)":""), str(int(redSwitchOwnershipTime)), str(int(redScaleOwnershipTime)), redClimbs==maxClimbs?str(redClimbs)+"         (RP)":str(redClimbs)};
+    String[] bmsg={"score", "ownership score", "penalty score", "ownership %", "switch own time", "scale own time", "climbs", (blueSide==Left?"(v) ":"(n) ")+"DQ"};
+    String[] bval={str(int(blueScore)), str(int(blueOwnershipScore)), str(int(bluePenaltyScore)), nf(blueOwnershipPercent, 3, 1)+(blueOwnershipPercent>=ownershipRPPercent?"   (RP)":""), str(int(blueSwitchOwnershipTime)), str(int(blueScaleOwnershipTime)), blueClimbs==maxClimbs?str(blueClimbs)+"         (RP)":str(blueClimbs), DQBlue?"YES :(":"no"};
+    String[] rmsg={"score", "ownership score", "penalty score", "ownership %", "switch own time", "scale own time", "climbs", (blueSide==Right?"(v) ":"(n) ")+"DQ"};
+    String[] rval={str(int(redScore)), str(int(redOwnershipScore)), str(int(redPenaltyScore)), nf(redOwnershipPercent, 3, 1)+(redOwnershipPercent>=ownershipRPPercent?"   (RP)":""), str(int(redSwitchOwnershipTime)), str(int(redScaleOwnershipTime)), redClimbs==maxClimbs?str(redClimbs)+"         (RP)":str(redClimbs), DQRed?"YES :(":"no"};
     if (blueSide==Left) {
       dispData(color(0, 0, 100), bmsg, bval, 0, 0, width*.25, height, 35);
       dispData(color(100, 0, 0), rmsg, rval, width*.75, 0, width*.25, height, 35);
@@ -48,7 +47,7 @@ class refPWindow extends PApplet {
       nextState=false;
       state++;
       if (state==2) {//post match
-        String strToSave=str(year())+"/"+str(month())+"/"+str(day())+" "+str(hour())+":"+str(minute())+":"+str(second())+","+str(int(blueScore))+","+str(int(redScore))+","+str(blueRP)+","+str(int(redRP))+","+str(bluePenaltyScore)+","+str(redPenaltyScore)+","+str(blueClimbs)+","+str(redClimbs)+","+nf(blueOwnershipPercent, 3, 1)+","+nf(redOwnershipPercent, 3, 1)+","+int(blueSwitchOwnershipTime)+","+int(redSwitchOwnershipTime)+","+int(blueScaleOwnershipTime)+","+int(redScaleOwnershipTime) +","+str(int(totalMatchTime-matchTime));
+        String strToSave=str(year())+"/"+str(month())+"/"+str(day())+" "+str(hour())+":"+str(minute())+":"+str(second())+","+str(int(blueScore))+","+str(int(redScore))+","+str(blueRP)+","+str(int(redRP))+","+str(bluePenaltyScore)+","+str(redPenaltyScore)+","+str(blueClimbs)+","+str(redClimbs)+","+nf(blueOwnershipPercent, 3, 1)+","+nf(redOwnershipPercent, 3, 1)+","+int(blueSwitchOwnershipTime)+","+int(redSwitchOwnershipTime)+","+int(blueScaleOwnershipTime)+","+int(redScaleOwnershipTime) +","+str(int(totalMatchTime-matchTime))+","+str(int(DQBlue))+","+str(int(DQRed));
         try {        
           String[] stringsToSave=loadStrings(filename);
           stringsToSave=append(stringsToSave, strToSave);                  
@@ -351,6 +350,21 @@ class refPWindow extends PApplet {
           redClimbs++;
         } else {
           blueClimbs++;
+        }
+      }
+
+      if (key=='v') {
+        if (blueSide==Right) {
+          DQRed=!DQRed;
+        } else {
+          DQBlue=!DQBlue;
+        }
+      }
+      if (key=='n') {
+        if (blueSide==Left) {
+          DQRed=!DQRed;
+        } else {
+          DQBlue=!DQBlue;
         }
       }
       if (redClimbs>maxClimbs)

@@ -47,6 +47,9 @@ int blueClimbs=0;
 
 int state=-1;
 
+boolean DQRed=false;
+boolean DQBlue=false;
+
 float matchTime=0;
 int totalMatchTime=5*60;/////
 int matchStartMillis=0;
@@ -141,6 +144,8 @@ void draw() {
     blueOwnershipPercent=0;
     redRP=0;
     blueRP=0;
+    DQRed=false;
+    DQBlue=false;
     matchStartMillis=millis();
   }
   if (state==-1) {
@@ -247,8 +252,20 @@ void draw() {
     text("final scores are being reviewed", width/4, height/2);
     redScore=redOwnershipScore+redPenaltyScore+climbPoints*redClimbs;
     blueScore=blueOwnershipScore+bluePenaltyScore+climbPoints*blueClimbs;
+    if (DQBlue) {
+      blueScore=-9999;
+    }
+    if (DQRed) {
+      redScore=-9999;
+    }
     redRP=2*int(int(redScore)>int(blueScore)+int(int(redScore)==int(blueScore)))+int(redOwnershipPercent>=ownershipRPPercent)+int(redClimbs==maxClimbs);
     blueRP=2*int(int(blueScore)>int(redScore)+int(int(blueScore)==int(redScore)))+int(blueOwnershipPercent>=ownershipRPPercent)+int(blueClimbs==maxClimbs);
+    if (DQBlue) {
+      blueRP=0;
+    }
+    if (DQRed) {
+      redRP=0;
+    }
   }
 }
 
@@ -348,12 +365,12 @@ void drawScores(float y, float h, float w) {
 
   fill(100, 100, 255);
   rect(width*.5, y, width*w*blueSide, h);
-  fill(255);
+  fill(DQBlue?color(255, 155, 0):color(255));
   text(str(int(blueScore)), width/2-w/2*width+w*blueSide*width/2, y, width*w, h);
 
   fill(100, 0, 0);
   rect(width*.5, y, width*-w*blueSide, h);
-  fill(255);
+  fill(DQRed?color(255, 155, 0):color(255));
   text(str(int(redScore)), width/2-w/2*width-w*blueSide*width/2, y, width*w, h);
 
   popStyle();
