@@ -7,8 +7,8 @@ static final int Center=0;
 static final int Left=-1;
 static final int Right=1;
 
-String filename="C:/Users/Joshua/Google Drive/JoshuaFiles/Current/Projects/rcmgames/RCMgames/competition scoring/mini powerup/test/rcmscores.txt";
-String serialPort="COM5";
+String filename="C:/Users/Pickerell/Desktop/RCMscoring_PowerUpMini-master/rcm scoring tect file.txt";
+String serialPort="COM8";
 
 int blueSide=Right;////
 int LswitchBlue=Far;////
