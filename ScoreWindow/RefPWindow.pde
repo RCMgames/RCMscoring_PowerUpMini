@@ -57,6 +57,29 @@ class refPWindow extends PApplet {
           String[] stringsToSave={strToSave};
           saveStrings(filename, stringsToSave);
         }
+        if (blueSide==Left) {
+          if (keyPressed&&key=='5') {
+            blueRP++;
+          }
+          if (keyPressed&&key=='6') {
+            blueRP++;
+            redRP++;
+          }
+          if (keyPressed&&key=='7') {
+            redRP++;
+          }
+        } else {
+          if (keyPressed&&key=='7') {
+            blueRP++;
+          }
+          if (keyPressed&&key=='6') {
+            blueRP++;
+            redRP++;
+          }
+          if (keyPressed&&key=='5') {
+            redRP++;
+          }
+        }
       }
       if (state>2) {
         state=-1;
@@ -73,7 +96,7 @@ class refPWindow extends PApplet {
     text("(b) "+ms[state+1], width*.6, height*.8, width*.1, height*.2);
     popStyle();
 
-    if (state==0||state==1) {
+    if (state==0||state==1) {//match or review
       rectMode(CENTER);
       textSize(20);
       if (blueSide==Right) {
@@ -101,6 +124,9 @@ class refPWindow extends PApplet {
       text("(d) Tech Foul", width*.3, height*.5, width*.09, height*.2);
       text("(g) Climb", width*.4, height*.3, width*.09, height*.15);
       rectMode(CORNER);
+      fill(0);
+      text("ANTI Tech=e Foul=r", width*.3, height*.16);
+      text("ANTI Foul=u Tech=i", width*.6, height*.16);
     }
     if (plateOverride) {
       rectMode(CENTER);
@@ -337,7 +363,36 @@ class refPWindow extends PApplet {
           blueTechFoulMillis=millis();
         }
       }
-
+      ///////////////////////////////////////////////////////////
+      if (key=='u') {
+        if (blueSide==Left) {
+          redPenaltyScore+=foulValue;
+        } else {
+          bluePenaltyScore+=foulValue;
+        }
+      }
+      if (key=='i') {
+        if (blueSide==Left) {
+          redPenaltyScore+=techFoulValue;
+        } else {
+          bluePenaltyScore+=techFoulValue;
+        }
+      }
+      if (key=='r') {
+        if (blueSide==Right) {
+          redPenaltyScore+=foulValue;
+        } else {
+          bluePenaltyScore+=foulValue;
+        }
+      }
+      if (key=='e') {
+        if (blueSide==Right) {
+          redPenaltyScore+=techFoulValue;
+        } else {
+          bluePenaltyScore+=techFoulValue;
+        }
+      }
+      /////////////////////////////////////////////
       if (key=='g') {
         if (blueSide==Right) {
           redClimbs++;

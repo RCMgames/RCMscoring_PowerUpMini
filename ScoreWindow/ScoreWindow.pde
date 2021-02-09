@@ -153,6 +153,13 @@ void draw() {
     textSize(20);
     fill(0);
     text("pre match", width/2, height/2);
+    if (blueSide==Right) {
+      drawSwitchScaleIcon(width*.2, height*.9, color(255, 0, 0), color(150), redSwitch(), redScale());
+      drawSwitchScaleIcon(width*.8, height*.9, color(0, 0, 255), color(150), blueSwitch(), blueScale());
+    } else { 
+      drawSwitchScaleIcon(width*.2, height*.9, color(0, 0, 255), color(150), blueSwitch(), blueScale());
+      drawSwitchScaleIcon(width*.8, height*.9, color(255, 0, 0), color(150), redSwitch(), redScale());
+    }
   }
 
   if (state==2) {
