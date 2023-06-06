@@ -9,7 +9,7 @@ static final int Center=0;
 static final int Left=-1;
 static final int Right=1;
 
-String filename="C://Users/Joshua/Desktop/rcm scoring text file.txt";
+String filename="data/rcm_scoring_text_file.txt";
 String serialPort="COM8";
 String lightsSerialPort="COM13";
 
@@ -477,4 +477,16 @@ void dispData(color c, String[] msg, String[] val, float x, float y, float w, fl
     text(": "+val[i], x+5+constrain(textWidth(msg[i]+": "), 0, w*.95), (i)*h/(msg.length+1)+y, w- textWidth(": "+msg[i]), 2*h/(msg.length+1));
   }
   popStyle();
+}
+void saveMatchString(String strToSave) {
+  try {
+    String[] stringsToSave=loadStrings(filename);
+    stringsToSave=append(stringsToSave, strToSave);                  
+    saveStrings(filename, stringsToSave);
+  }
+  catch(NullPointerException e) {
+    String[] stringsToSave={strToSave};
+    println(strToSave);
+    saveStrings(filename, stringsToSave);
+  }
 }

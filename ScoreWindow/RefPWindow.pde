@@ -50,15 +50,7 @@ class refPWindow extends PApplet {
       state++;
       if (state==2) {//post match
         String strToSave=str(year())+"/"+str(month())+"/"+str(day())+" "+str(hour())+":"+str(minute())+":"+str(second())+","+str(int(blueScore))+","+str(int(redScore))+","+str(blueRP)+","+str(int(redRP))+","+str(bluePenaltyScore)+","+str(redPenaltyScore)+","+str(blueClimbs)+","+str(redClimbs)+","+nf(blueOwnershipPercent, 3, 1)+","+nf(redOwnershipPercent, 3, 1)+","+int(blueSwitchOwnershipTime)+","+int(redSwitchOwnershipTime)+","+int(blueScaleOwnershipTime)+","+int(redScaleOwnershipTime) +","+str(int(totalMatchTime-matchTime))+","+str(int(DQBlue))+","+str(int(DQRed));
-        try {
-          String[] stringsToSave=loadStrings(filename);
-          stringsToSave=append(stringsToSave, strToSave);                  
-          saveStrings(filename, stringsToSave);
-        }
-        catch(NullPointerException e) {
-          String[] stringsToSave={strToSave};
-          saveStrings(filename, stringsToSave);
-        }
+        saveMatchString(strToSave);
       }
       if (state>2) {
         state=-1;
