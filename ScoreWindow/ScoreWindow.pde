@@ -1,14 +1,17 @@
+
 refPWindow refWin;
 import processing.serial.*;
 Serial myPort;
+Serial lightsPort;
 static final int Near=1;
 static final int Far=-1;
 static final int Center=0;
 static final int Left=-1;
 static final int Right=1;
 
-String filename="C:/Users/Pickerell/Desktop/RCMscoring_PowerUpMini-master/rcm scoring tect file.txt";
+String filename="C://Users/Joshua/Desktop/rcm scoring text file.txt";
 String serialPort="COM8";
+String lightsSerialPort="COM13";
 
 int blueSide=Right;////
 int LswitchBlue=Far;////
@@ -76,6 +79,7 @@ long blueFoulMillis=0;
 long redTechFoulMillis=0;
 long blueTechFoulMillis=0;
 long lastMillisArduinoComms=0;
+long lastSentLedComms=0;
 
 Integer leftSwitchOverride=null;
 Integer scaleOverride=null;
@@ -85,11 +89,10 @@ int maxClimbs=2;////
 
 
 void settings() {
-  size(1920, 300);
+  size(2560, 400);
 }  
 
 void setup() {
-  refWin=new refPWindow();
   frameRate(100);
   try {
     myPort=new Serial(this, serialPort, 250000);
@@ -97,20 +100,32 @@ void setup() {
   catch(RuntimeException e) {
     println("WARNING: FIELD ARDUINO DISCONNECTED");
   }
+  try {
+    lightsPort=new Serial(this, lightsSerialPort, 250000);
+  }
+  catch(RuntimeException e) {
+    println("WARNING: LIGHTS ARDUINO DISCONNECTED");
+  }
+  println("sw setup");
+  refWin=new refPWindow();
 }
 
 void serialEvent(Serial p) {
-  lastMillisArduinoComms=millis();
-  int in=p.read();
-  LswitchPosA=0;
-  scalePosA=0;
-  RswitchPosA=0;
-  if (((byte)in & 0x01)==1) LswitchPosA+=Far;
-  if (((byte)in>>1 & 0x01)==1) LswitchPosA+=Near;
-  if (((byte)in>>2 & 0x01)==1) scalePosA+=Far;
-  if (((byte)in>>3 & 0x01)==1) scalePosA+=Near;
-  if (((byte)in>>4 & 0x01)==1) RswitchPosA+=Far;
-  if (((byte)in>>5 & 0x01)==1) RswitchPosA+=Near;
+  if (p.equals(lightsPort)) {
+    print((char)p.read());
+  } else {
+    lastMillisArduinoComms=millis();
+    int in=p.read();
+    LswitchPosA=0;
+    scalePosA=0;
+    RswitchPosA=0;
+    if (((byte)in & 0x01)==1) LswitchPosA+=Far;
+    if (((byte)in>>1 & 0x01)==1) LswitchPosA+=Near;
+    if (((byte)in>>2 & 0x01)==1) scalePosA+=Far;
+    if (((byte)in>>3 & 0x01)==1) scalePosA+=Near;
+    if (((byte)in>>4 & 0x01)==1) RswitchPosA+=Far;
+    if (((byte)in>>5 & 0x01)==1) RswitchPosA+=Near;
+  }
 }
 
 void draw() {
@@ -256,7 +271,7 @@ void draw() {
     background(#FFFF00);
     textSize(50);
     fill(0);
-    text("final scores are being reviewed", width/4, height/2);
+    text("final scores are being reviewed", width/3, height/2);
     redScore=redOwnershipScore+redPenaltyScore+climbPoints*redClimbs;
     blueScore=blueOwnershipScore+bluePenaltyScore+climbPoints*blueClimbs;
     if (DQBlue) {
@@ -272,6 +287,25 @@ void draw() {
     }
     if (DQRed) {
       redRP=0;
+    }
+  }
+  if (millis()-lastSentLedComms>250) {
+    lastSentLedComms=millis();
+    byte[] lightBuffer = {
+      (byte)(254), 
+      (byte)(state+10), 
+      (byte)(((int(totalMatchTime-matchTime))&16256)>>7), 
+      (byte)(((int(totalMatchTime-matchTime))&127)), 
+      (byte)((blueSwitch()?1:0)|((byte)(redSwitch()?1:0)<<1)|((byte)(blueScale()?1:0)<<2)|((byte)(redScale()?1:0)<<3)), 
+      (byte)(constrain(int(redScore)-int(blueScore), -1, 1)), 
+      (byte)(constrain(redScore/5, 0, 200)), 
+      (byte)(constrain(blueScore/5, 0, 200)), 
+      (byte)(255)};
+    try {
+      lightsPort.write(lightBuffer);
+    }
+    catch(NullPointerException e) {
+      println("light arduino communication error");
     }
   }
 }
@@ -335,7 +369,7 @@ void drawTime(float w, float h, float y) {
   stroke(0);
 
   if (totalMatchTime-matchTime<autoTime) {    
-    fill(220, 245, 90);
+    fill(255, 255, 90);
   } else {
     fill(255, 200, 100);
   }

@@ -19,17 +19,17 @@ void setup() {
 
 void loop() {
   dataToSend = 0;
-  if (digitalRead(leftSwitchFarPin) == LOW)
+  if (digitalRead(leftSwitchFarPin) == HIGH)
     bitSet(dataToSend, 0);
-  if (digitalRead(leftSwitchClosePin) == LOW)
+  if (digitalRead(leftSwitchClosePin) == HIGH)
     bitSet(dataToSend, 1);
-  if (digitalRead(scaleFarPin) == LOW)
+  if (digitalRead(scaleFarPin) == HIGH)
     bitSet(dataToSend, 2);
-  if (digitalRead(scaleClosePin) == LOW)
+  if (digitalRead(scaleClosePin) == HIGH)
     bitSet(dataToSend, 3);
-  if (digitalRead(rightSwitchFarPin) == LOW)
+  if (digitalRead(rightSwitchFarPin) == HIGH)
     bitSet(dataToSend, 4);
-  if (digitalRead(rightSwitchClosePin) == LOW)
+  if (digitalRead(rightSwitchClosePin) == HIGH)
     bitSet(dataToSend, 5);
 
   Serial.write(dataToSend);

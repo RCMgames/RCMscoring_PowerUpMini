@@ -12,6 +12,8 @@ class refPWindow extends PApplet {
   void setup() {    
     frameRate(100);
     background(255);
+
+    println("rw setup");
   }
 
   void draw() {
@@ -48,7 +50,7 @@ class refPWindow extends PApplet {
       state++;
       if (state==2) {//post match
         String strToSave=str(year())+"/"+str(month())+"/"+str(day())+" "+str(hour())+":"+str(minute())+":"+str(second())+","+str(int(blueScore))+","+str(int(redScore))+","+str(blueRP)+","+str(int(redRP))+","+str(bluePenaltyScore)+","+str(redPenaltyScore)+","+str(blueClimbs)+","+str(redClimbs)+","+nf(blueOwnershipPercent, 3, 1)+","+nf(redOwnershipPercent, 3, 1)+","+int(blueSwitchOwnershipTime)+","+int(redSwitchOwnershipTime)+","+int(blueScaleOwnershipTime)+","+int(redScaleOwnershipTime) +","+str(int(totalMatchTime-matchTime))+","+str(int(DQBlue))+","+str(int(DQRed));
-        try {        
+        try {
           String[] stringsToSave=loadStrings(filename);
           stringsToSave=append(stringsToSave, strToSave);                  
           saveStrings(filename, stringsToSave);
@@ -56,29 +58,6 @@ class refPWindow extends PApplet {
         catch(NullPointerException e) {
           String[] stringsToSave={strToSave};
           saveStrings(filename, stringsToSave);
-        }
-        if (blueSide==Left) {
-          if (keyPressed&&key=='5') {
-            blueRP++;
-          }
-          if (keyPressed&&key=='6') {
-            blueRP++;
-            redRP++;
-          }
-          if (keyPressed&&key=='7') {
-            redRP++;
-          }
-        } else {
-          if (keyPressed&&key=='7') {
-            blueRP++;
-          }
-          if (keyPressed&&key=='6') {
-            blueRP++;
-            redRP++;
-          }
-          if (keyPressed&&key=='5') {
-            redRP++;
-          }
         }
       }
       if (state>2) {
