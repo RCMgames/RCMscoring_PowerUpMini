@@ -9,14 +9,15 @@ static final int Center=0;
 static final int Left=-1;
 static final int Right=1;
 
-String filename="data/rcm_scoring_text_file.txt";
-String serialPort="COM8";
-String lightsSerialPort="COM13";
+String serialPort="COM8";////
+String lightsSerialPort="COM13";////
 
 int blueSide=Right;////
 int LswitchBlue=Far;////
 int scaleBlue=Far;////
 int RswitchBlue=Far;////
+
+String filename="data/rcm_scoring_text_file.txt";
 
 int LswitchPos=0;
 int scalePos=0;
