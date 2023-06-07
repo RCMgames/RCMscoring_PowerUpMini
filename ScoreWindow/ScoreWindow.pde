@@ -298,7 +298,7 @@ void draw() {
       (byte)(((int(totalMatchTime-matchTime))&16256)>>7), 
       (byte)(((int(totalMatchTime-matchTime))&127)), 
       (byte)((blueSwitch()?1:0)|((byte)(redSwitch()?1:0)<<1)|((byte)(blueScale()?1:0)<<2)|((byte)(redScale()?1:0)<<3)), 
-      (byte)(constrain(int(redScore)-int(blueScore), -1, 1)), 
+      (byte)(constrain(int(redScore)-int(blueScore), -1, 1)+10), 
       (byte)(constrain(redScore/5, 0, 200)), 
       (byte)(constrain(blueScore/5, 0, 200)), 
       (byte)(255)};
